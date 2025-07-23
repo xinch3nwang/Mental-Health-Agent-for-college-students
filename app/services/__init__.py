@@ -1,0 +1,4 @@
+# 服务初始化文件，统一导出所有服务
+from app.services.emotion_analysis import analyze_text_emotion, analyze_speech_emotion
+from app.services.stress_assessment import assess_stress_level
+from app.services.intervention_generator import generate_intervention

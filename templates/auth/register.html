@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}注册{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-xl font-bold text-white">用户注册</h2>
+    </div>
+    <div class="px-6 py-4">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                {{ form.username.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.username(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+                {% for error in form.username.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="mb-4">
+                {{ form.email.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.email(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+                {% for error in form.email.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="mb-4">
+                {{ form.password.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.password(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+                {% for error in form.password.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="mb-6">
+                {{ form.password2.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.password2(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline") }}
+                {% for error in form.password2.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="flex items-center justify-between">
+                {{ form.submit(class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300") }}
+                <a href="{{ url_for('auth.login') }}" class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800 transition duration-300">
+                    已有账号？登录
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

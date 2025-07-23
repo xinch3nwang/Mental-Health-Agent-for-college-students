@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}情绪趋势{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center flex-wrap gap-4">
+    <h1 class="text-2xl font-bold text-gray-800">我的情绪趋势</h1>
+    <div class="flex space-x-2">
+        <button id="day-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+            日
+        </button>
+        <button id="week-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+            周
+        </button>
+        <button id="month-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+            月
+        </button>
+        <button id="year-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+            年
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4">情绪变化趋势</h2>
+        <div class="h-80">
+            <canvas id="emotionTrendChart"></canvas>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4">情绪分布</h2>
+        <div class="h-64">
+            <canvas id="emotionDistributionChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2">
+            {% for label, count, percentage in emotion_stats %}
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 rounded-full mr-2
+                        {% if label == 'positive' %}bg-green-500
+                        {% elif label == 'negative' %}bg-red-500
+                        {% elif label == 'sad' %}bg-blue-500
+                        {% elif label == 'angry' %}bg-orange-500
+                        {% elif label == 'anxious' %}bg-purple-500
+                        {% else %}bg-gray-500
+                        {% endif %}"></span>
+                    <span class="text-gray-700 capitalize">{{ label }}</span>
+                </div>
+                <span class="text-gray-600">{{ count }} ({{ percentage }}%)</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">情绪与语音特征关联</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="h-64">
+            <canvas id="emotionSpeechRateChart"></canvas>
+        </div>
+        <div class="h-64">
+            <canvas id="emotionVolumeChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md mb-6">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <i class="fas fa-info-circle text-blue-500"></i>
+        </div>
+        <div class="ml-3">
+            <p class="text-sm text-blue-700">
+                情绪趋势分析可以帮助您了解自己的情绪变化模式，识别可能影响情绪的因素，并采取适当的措施来改善心理健康。
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 情绪趋势图表
+        const trendCtx = document.getElementById('emotionTrendChart').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ labels|tojson }},
+                datasets: [
+                    {% for emotion, data in trend_data.items() %}
+                    {
+                        label: '{{ emotion|capitalize }}',
+                        data: {{ data|tojson }},
+                        borderColor: {% if emotion == 'positive' %}'#10B981'{% elif emotion == 'negative' %}'#EF4444'{% elif emotion == 'sad' %}'#3B82F6'{% elif emotion == 'angry' %}'#F97316'{% elif emotion == 'anxious' %}'#8B5CF6'{% else %}'#6B7280'{% endif %},
+                        backgroundColor: {% if emotion == 'positive' %}'rgba(16, 185, 129, 0.1)'{% elif emotion == 'negative' %}'rgba(239, 68, 68, 0.1)'{% elif emotion == 'sad' %}'rgba(59, 130, 246, 0.1)'{% elif emotion == 'angry' %}'rgba(249, 115, 22, 0.1)'{% elif emotion == 'anxious' %}'rgba(139, 92, 246, 0.1)'{% else %}'rgba(107, 114, 128, 0.1)'{% endif %},
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {% endfor %}
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '情绪出现次数'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '时间'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 情绪分布图表
+        const distributionCtx = document.getElementById('emotionDistributionChart').getContext('2d');
+        const distributionChart = new Chart(distributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ emotion_labels|tojson }},
+                datasets: [{
+                    data: {{ emotion_counts|tojson }},
+                    backgroundColor: [
+                        {% for label in emotion_labels %}
+                        {% if label == 'positive' %}'#10B981'{% elif label == 'negative' %}'#EF4444'{% elif label == 'sad' %}'#3B82F6'{% elif label == 'angry' %}'#F97316'{% elif label == 'anxious' %}'#8B5CF6'{% else %}'#6B7280'{% endif %},
+                        {% endfor %}
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                cutout: '65%'
+            }
+        });
+
+        // 情绪与语速关联图表
+        const speechRateCtx = document.getElementById('emotionSpeechRateChart').getContext('2d');
+        const speechRateChart = new Chart(speechRateCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ emotion_labels|tojson }},
+                datasets: [{
+                    label: '平均语速',
+                    data: {{ speech_rate_data|tojson }},
+                    backgroundColor: [
+                        {% for label in emotion_labels %}
+                        {% if label == 'positive' %}'rgba(16, 185, 129, 0.7)'{% elif label == 'negative' %}'rgba(239, 68, 68, 0.7)'{% elif label == 'sad' %}'rgba(59, 130, 246, 0.7)'{% elif label == 'angry' %}'rgba(249, 115, 22, 0.7)'{% elif label == 'anxious' %}'rgba(139, 92, 246, 0.7)'{% else %}'rgba(107, 114, 128, 0.7)'{% endif %},
+                        {% endfor %}
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '语速 (音节/秒)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '情绪类型'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 情绪与音量关联图表
+        const volumeCtx = document.getElementById('emotionVolumeChart').getContext('2d');
+        const volumeChart = new Chart(volumeCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ emotion_labels|tojson }},
+                datasets: [{
+                    label: '平均音量',
+                    data: {{ volume_data|tojson }},
+                    backgroundColor: [
+                        {% for label in emotion_labels %}
+                        {% if label == 'positive' %}'rgba(16, 185, 129, 0.7)'{% elif label == 'negative' %}'rgba(239, 68, 68, 0.7)'{% elif label == 'sad' %}'rgba(59, 130, 246, 0.7)'{% elif label == 'angry' %}'rgba(249, 115, 22, 0.7)'{% elif label == 'anxious' %}'rgba(139, 92, 246, 0.7)'{% else %}'rgba(107, 114, 128, 0.7)'{% endif %},
+                        {% endfor %}
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '音量 (dB)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: '情绪类型'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 时间段选择按钮事件
+        const dayBtn = document.getElementById('day-btn');
+        const weekBtn = document.getElementById('week-btn');
+        const monthBtn = document.getElementById('month-btn');
+        const yearBtn = document.getElementById('year-btn');
+
+        dayBtn.addEventListener('click', function() {
+            updateTimePeriod('day');
+            setActiveButton(dayBtn);
+        });
+
+        weekBtn.addEventListener('click', function() {
+            updateTimePeriod('week');
+            setActiveButton(weekBtn);
+        });
+
+        monthBtn.addEventListener('click', function() {
+            updateTimePeriod('month');
+            setActiveButton(monthBtn);
+        });
+
+        yearBtn.addEventListener('click', function() {
+            updateTimePeriod('year');
+            setActiveButton(yearBtn);
+        });
+
+        function setActiveButton(activeBtn) {
+            [dayBtn, weekBtn, monthBtn, yearBtn].forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                btn.classList.add('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+            });
+            activeBtn.classList.remove('bg-gray-200', 'hover:bg-gray-300', 'text-gray-700');
+            activeBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+        }
+
+        function updateTimePeriod(period) {
+            // 这里应该发送AJAX请求获取对应时间段的数据
+            // 为简化示例，我们仅更新图表标题
+            trendChart.options.scales.x.title.text = `时间 (${period === 'day' ? '小时' : period === 'week' ? '天' : period === 'month' ? '周' : '月'})`;
+            trendChart.update();
+        }
+    });
+</script>
+{% endblock %}

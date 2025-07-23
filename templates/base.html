@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - 心晴</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-heart text-xl"></i>
+                <span class="text-xl font-bold">心晴</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('emotion.diary') }}" class="hover:text-blue-200 transition duration-300">情绪日记</a>
+                    <a href="{{ url_for('stress.index') }}" class="hover:text-blue-200 transition duration-300">压力自测</a>
+                    <a href="{{ url_for('intervention.index') }}" class="hover:text-blue-200 transition duration-300">干预中心</a>
+                    <a href="{{ url_for('auth.logout') }}" class="hover:text-blue-200 transition duration-300">退出</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="hover:text-blue-200 transition duration-300">登录</a>
+                    <a href="{{ url_for('auth.register') }}" class="hover:text-blue-200 transition duration-300">注册</a>
+                {% endif %}
+            </div>
+            <!-- 移动端菜单按钮 -->
+            <div class="md:hidden">
+                <button class="text-white focus:outline-none" id="menu-toggle">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-blue-700 py-2 px-4" id="mobile-menu">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('emotion.diary') }}" class="block py-2 hover:text-blue-200 transition duration-300">情绪日记</a>
+                <a href="{{ url_for('stress.index') }}" class="block py-2 hover:text-blue-200 transition duration-300">压力自测</a>
+                <a href="{{ url_for('intervention.index') }}" class="block py-2 hover:text-blue-200 transition duration-300">干预中心</a>
+                <a href="{{ url_for('auth.logout') }}" class="block py-2 hover:text-blue-200 transition duration-300">退出</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="block py-2 hover:text-blue-200 transition duration-300">登录</a>
+                <a href="{{ url_for('auth.register') }}" class="block py-2 hover:text-blue-200 transition duration-300">注册</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        <!-- 消息提示 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-md shadow-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 页面内容 -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-heart text-xl"></i>
+                        <span class="text-xl font-bold">心晴</span>
+                    </div>
+                    <p class="text-gray-400 mt-1">大学生心理健康智能助手</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fab fa-github text-xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fab fa-weixin text-xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300"><i class="fas fa-envelope text-xl"></i></a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
+                <p>&copy; 2025 心晴 - 大学生心理健康智能助手. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

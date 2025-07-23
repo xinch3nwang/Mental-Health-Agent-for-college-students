@@ -1,0 +1,126 @@
+/* 自定义样式补充 */
+
+/* 全局样式 */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* 动画效果 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* 自定义按钮样式 */
+.btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300;
+}
+
+.btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300;
+}
+
+.btn-purple {
+    @apply bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300;
+}
+
+/* 卡片悬停效果 */
+.card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+/* 进度条样式 */
+.progress-bar {
+    @apply h-2.5 rounded-full bg-gray-200 overflow-hidden;
+}
+
+.progress-value {
+    @apply h-full rounded-full transition-all duration-1000 ease-out;
+}
+
+/* 标签样式 */
+.tag {
+    @apply px-2 inline-flex text-xs leading-5 font-semibold rounded-full;
+}
+
+.tag-success {
+    @apply bg-green-100 text-green-800;
+}
+
+.tag-warning {
+    @apply bg-yellow-100 text-yellow-800;
+}
+
+.tag-danger {
+    @apply bg-red-100 text-red-800;
+}
+
+.tag-info {
+    @apply bg-blue-100 text-blue-800;
+}
+
+/* 表单样式 */
+.form-input {
+    @apply shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline;
+}
+
+.form-label {
+    @apply block text-gray-700 text-sm font-bold mb-2;
+}
+
+/* 加载动画 */
+.loader {
+    border-top-color: #3498db;
+    animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .grid-cols-1-sm {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+    .grid-cols-2-md {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* 导航栏滚动效果 */
+.nav-scrolled {
+    @apply bg-white shadow-md;
+}

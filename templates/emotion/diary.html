@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}情绪日记{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-800">我的情绪日记</h1>
+    <a href="{{ url_for('emotion.record') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300">
+        <i class="fas fa-plus mr-2"></i>记录新情绪
+    </a>
+</div>
+
+{% if records %}<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for record in records %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
+        <div class="px-6 py-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-500">{{ record.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                <span class="px-3 py-1 text-xs font-semibold rounded-full
+                    {% if record.emotion_label == 'positive' %}bg-green-100 text-green-800
+                    {% elif record.emotion_label == 'negative' %}bg-red-100 text-red-800
+                    {% elif record.emotion_label == 'sad' %}bg-blue-100 text-blue-800
+                    {% elif record.emotion_label == 'angry' %}bg-orange-100 text-orange-800
+                    {% elif record.emotion_label == 'anxious' %}bg-purple-100 text-purple-800
+                    {% else %}bg-gray-100 text-gray-800
+                    {% endif %}">
+                    {{ record.emotion_label }}
+                </span>
+            </div>
+            {% if record.content %}
+            <p class="text-gray-700 mb-4">{{ record.content }}</p>
+            {% endif %}
+            {% if record.audio_path %}
+            <div class="mt-4">
+                <audio controls class="w-full">
+                    <source src="{{ url_for('static', filename=record.audio_path.split('static/')[1]) }}" type="audio/mpeg">
+                    您的浏览器不支持音频播放。
+                </audio>
+            </div>
+            {% endif %}
+            <div class="mt-4 flex justify-between text-sm text-gray-500">
+                {% if record.speech_rate %}
+                <span>语速: {{ record.speech_rate|round(2) }}</span>
+                {% endif %}
+                {% if record.volume %}
+                <span>音量: {{ record.volume|round(2) }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>{% else %}
+<div class="bg-white rounded-lg shadow-md p-8 text-center">
+    <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-700 mb-2">您还没有情绪记录</h3>
+    <p class="text-gray-500 mb-6">开始记录您的情绪，了解自己的情绪变化</p>
+    <a href="{{ url_for('emotion.record') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 inline-block">
+        <i class="fas fa-plus mr-2"></i>开始记录
+    </a>
+</div>
+{% endif %}
+
+<div class="mt-8 text-center">
+    <a href="{{ url_for('emotion.trends') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition duration-300">
+        <i class="fas fa-chart-line mr-2"></i>查看情绪趋势
+    </a>
+</div>
+{% endblock %}

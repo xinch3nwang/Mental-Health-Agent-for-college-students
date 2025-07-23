@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}压力测试结果{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6 flex items-center justify-between flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">{{ test_type_name }}压力测试结果</h1>
+            <p class="text-gray-600 mt-1">测试日期: {{ test_timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+        </div>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('stress.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>返回列表
+            </a>
+            <a href="{{ url_for('stress.test', test_type=test_type) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 flex items-center">
+                <i class="fas fa-redo mr-2"></i>重新测试
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-6 md:col-span-1">
+            <div class="text-center mb-4">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full
+                    {% if stress_level == 'low' %}bg-green-100 text-green-600
+                    {% elif stress_level == 'medium' %}bg-yellow-100 text-yellow-600
+                    {% else %}bg-red-100 text-red-600
+                    {% endif %}">
+                    <span class="text-3xl font-bold">{{ score }}</span>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mt-4">压力等级</h3>
+                <p class="text-lg font-medium mt-2
+                    {% if stress_level == 'low' %}text-green-600
+                    {% elif stress_level == 'medium' %}text-yellow-600
+                    {% else %}text-red-600
+                    {% endif %}">
+                    {{ stress_level|capitalize }}
+                </p>
+            </div>
+            <div class="mt-6 space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">压力水平</span>
+                        <span class="font-medium
+                            {% if stress_level == 'low' %}text-green-600
+                            {% elif stress_level == 'medium' %}text-yellow-600
+                            {% else %}text-red-600
+                            {% endif %}">
+                            {{ stress_level|capitalize }}
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="h-2.5 rounded-full
+                            {% if stress_level == 'low' %}bg-green-500 w-1/4
+                            {% elif stress_level == 'medium' %}bg-yellow-500 w-2/4
+                            {% else %}bg-red-500 w-3/4
+                            {% endif %}"></div>
+                    </div>
+                </div>
+                {% if comparison_data %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">与上次相比</span>
+                        <span class="font-medium
+                            {% if comparison_data.trend == 'up' %}text-red-600
+                            {% elif comparison_data.trend == 'down' %}text-green-600
+                            {% else %}text-gray-600
+                            {% endif %}">
+                            {{ comparison_data.trend_text }}
+                        </span>
+                    </div>
+                    <div class="flex items-center mt-1">
+                        <i class="fas {{ comparison_data.icon }} mr-2
+                            {% if comparison_data.trend == 'up' %}text-red-600
+                            {% elif comparison_data.trend == 'down' %}text-green-600
+                            {% else %}text-gray-600
+                            {% endif %}"></i>
+                        <span class="text-sm text-gray-600">{{ comparison_data.diff_text }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 md:col-span-2">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4">测试分析</h2>
+            <div class="prose max-w-none text-gray-600 mb-6">
+                {{ analysis|safe }}
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">回答详情</h3>
+            <div class="space-y-4 max-h-60 overflow-y-auto pr-2">
+                {% for question, answer in answers.items() %}
+                <div class="border-b pb-3 last:border-0 last:pb-0">
+                    <p class="font-medium text-gray-700">{{ question }}</p>
+                    <p class="text-gray-500 text-sm mt-1">{{ answer }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">建议干预措施</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <h3 class="font-medium text-blue-800 mb-2 flex items-center">
+                    <i class="fas fa-heartbeat mr-2"></i>短期建议
+                </h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-1 pl-2">
+                    {% for item in short_term_interventions %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+                <h3 class="font-medium text-green-800 mb-2 flex items-center">
+                    <i class="fas fa-seedling mr-2"></i>长期建议
+                </h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-1 pl-2">
+                    {% for item in long_term_interventions %}
+                    <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <h3 class="font-medium text-gray-800 mb-3 flex items-center">
+                <i class="fas fa-book-open mr-2"></i>推荐资源
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {% for resource in recommended_resources %}
+                <a href="{{ resource.url }}" target="_blank" class="block p-4 border rounded-lg hover:bg-gray-50 transition duration-300">
+                    <h4 class="font-medium text-blue-600 mb-1">{{ resource.title }}</h4>
+                    <p class="text-sm text-gray-500">{{ resource.description }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-6">
+        <a href="{{ url_for('intervention.generate') }}" class="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition duration-300">
+            <i class="fas fa-magic mr-2"></i>生成个性化干预方案
+        </a>
+    </div>
+</div>
+{% endblock %}

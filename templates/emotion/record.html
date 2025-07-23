@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}记录情绪{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-xl font-bold text-white">记录您的情绪</h2>
+    </div>
+    <div class="px-6 py-4">
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-6">
+                {{ form.content.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.content(class="shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-none") }}
+                {% for error in form.content.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="mb-6 border-t pt-4">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">或者通过语音记录</h3>
+                <div class="flex items-center justify-center mb-4">
+                    <button type="button" id="record-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300 flex items-center">
+                        <i class="fas fa-microphone mr-2"></i>开始录音
+                    </button>
+                </div>
+                <div id="recording-status" class="hidden text-center mb-4">
+                    <div class="inline-block p-3 rounded-full bg-red-100 text-red-600 animate-pulse">
+                        <i class="fas fa-circle text-lg"></i>
+                    </div>
+                    <p class="mt-2 text-gray-600">正在录音...</p>
+                </div>
+                <div id="audio-preview" class="hidden mb-4">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">录音预览</h4>
+                    <audio id="audio-player" controls class="w-full"></audio>
+                    <input type="hidden" id="audio-data" name="audio_data">
+                </div>
+            </div>
+            <div class="mb-6">
+                {{ form.emotion_label.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                    {% for subfield in form.emotion_label %}
+                    <label class="flex flex-col items-center p-3 border rounded-lg cursor-pointer transition duration-300 hover:border-blue-500 hover:bg-blue-50">
+                        {{ subfield(class="sr-only") }}
+                        <span class="
+                            {% if subfield.data == 'positive' %}text-green-500
+                            {% elif subfield.data == 'negative' %}text-red-500
+                            {% elif subfield.data == 'sad' %}text-blue-500
+                            {% elif subfield.data == 'angry' %}text-orange-500
+                            {% elif subfield.data == 'anxious' %}text-purple-500
+                            {% else %}text-gray-500
+                            {% endif %}
+                            text-2xl mb-1") }}
+                        <span class="text-sm text-gray-700">{{ subfield.label.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for error in form.emotion_label.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="flex items-center justify-between">
+                {{ form.submit(class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition duration-300") }}
+                <a href="{{ url_for('emotion.diary') }}" class="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-gray-800 transition duration-300">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const recordBtn = document.getElementById('record-btn');
+        const recordingStatus = document.getElementById('recording-status');
+        const audioPreview = document.getElementById('audio-preview');
+        const audioPlayer = document.getElementById('audio-player');
+        const audioData = document.getElementById('audio-data');
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', function() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener('stop', () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayer.src = audioUrl;
+
+                        // Convert blob to base64 for form submission
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = function() {
+                            audioData.value = reader.result;
+                        };
+
+                        audioPreview.classList.remove('hidden');
+                    });
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.innerHTML = '<i class="fas fa-stop mr-2"></i>停止录音';
+                    recordBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    recordBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                    recordingStatus.classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('Error accessing microphone:', error);
+                    alert('无法访问麦克风。请确保您已授予麦克风权限。');
+                });
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            isRecording = false;
+            recordBtn.innerHTML = '<i class="fas fa-microphone mr-2"></i>开始录音';
+            recordBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+            recordBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+            recordingStatus.classList.add('hidden');
+
+            // Stop all audio tracks
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

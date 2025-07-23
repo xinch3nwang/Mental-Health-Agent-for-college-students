@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test_type_name }}压力测试{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-gradient-to-r
+        {% if test_type == 'exam' %}from-blue-500 to-blue-700
+        {% elif test_type == 'social' %}from-purple-500 to-purple-700
+        {% elif test_type == 'goal' %}from-green-500 to-green-700
+        {% elif test_type == 'work' %}from-orange-500 to-orange-700
+        {% else %}from-gray-500 to-gray-700
+        {% endif %}
+        px-6 py-4">
+        <h2 class="text-xl font-bold text-white">{{ test_type_name }}压力测试</h2>
+    </div>
+    <div class="px-6 py-4">
+        <p class="text-gray-600 mb-6">{{ test_description }}</p>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-6">
+                {% for question in form.questions %}<div class="mb-8 border-b pb-6 last:border-0 last:pb-0">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">{{ loop.index }}. {{ question.label.text }}</h3>
+                    <div class="space-y-3">
+                        {% for choice in question %}<div class="flex items-center">
+                            {{ choice(class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded") }}
+                            <label for="{{ choice.id }}" class="ml-3 block text-sm text-gray-700">{{ choice.label.text }}</label>
+                        </div>{% endfor %}
+                    </div>
+                    {% for error in question.errors %}
+                        <span class="text-red-500 text-xs italic">{{ error }}</span>
+                    {% endfor %}
+                </div>{% endfor %}
+            </div>
+            <div class="flex items-center justify-between pt-4 border-t">
+                {{ form.submit(class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition duration-300") }}
+                <a href="{{ url_for('stress.index') }}" class="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-gray-800 transition duration-300">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

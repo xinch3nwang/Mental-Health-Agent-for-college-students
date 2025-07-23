@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}干预中心{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center flex-wrap gap-4">
+    <h1 class="text-2xl font-bold text-gray-800">干预中心</h1>
+    <a href="{{ url_for('intervention.generate') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 flex items-center">
+        <i class="fas fa-magic mr-2"></i>生成新干预方案
+    </a>
+</div>
+
+{% if intervention_plans %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    {% for plan in intervention_plans %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">{{ plan.title }}</h3>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                    {% if plan.status == 'active' %}bg-green-100 text-green-800
+                    {% elif plan.status == 'completed' %}bg-gray-100 text-gray-800
+                    {% else %}bg-yellow-100 text-yellow-800
+                    {% endif %}">
+                    {{ plan.status|capitalize }}
+                </span>
+            </div>
+            <p class="text-gray-600 mb-4">{{ plan.goal }}</p>
+            <div class="flex justify-between text-sm text-gray-500 mb-4">
+                <span>生成日期: {{ plan.timestamp.strftime('%Y-%m-%d') }}</span>
+                <span>持续时间: {{ plan.duration }}</span>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{{ url_for('intervention.detail', plan_id=plan.id) }}" class="flex-1 bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 text-center">
+                    查看详情
+                </a>
+                <a href="{{ url_for('intervention.generate') }}" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 text-center">
+                    调整方案
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-lg shadow-md p-8 text-center mb-6">
+    <i class="fas fa-hand-holding-heart text-5xl text-purple-300 mb-4"></i>
+    <h3 class="text-xl font-semibold text-gray-700 mb-2">您还没有干预方案</h3>
+    <p class="text-gray-500 mb-6">根据您的情绪和压力状况，生成个性化的干预方案</p>
+    <a href="{{ url_for('intervention.generate') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition duration-300 inline-block">
+        <i class="fas fa-magic mr-2"></i>生成第一个干预方案
+    </a>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>心理健康小贴士
+        </h2>
+        <div class="space-y-4">
+            {% for tip in mental_health_tips %}
+            <div class="flex">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center mr-4">
+                    <span class="text-yellow-600 font-semibold">{{ loop.index }}</span>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-800 mb-1">{{ tip.title }}</h3>
+                    <p class="text-gray-600 text-sm">{{ tip.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-phone-alt text-red-500 mr-2"></i>紧急支持资源
+        </h2>
+        <div class="space-y-4">
+            {% for resource in emergency_resources %}
+            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 transition duration-300">
+                <i class="fas {{ resource.icon }} text-red-500 text-xl mr-4"></i>
+                <div>
+                    <h3 class="font-medium text-gray-800 mb-1">{{ resource.name }}</h3>
+                    <p class="text-gray-600 text-sm">{{ resource.description }}</p>
+                    <p class="text-red-600 font-medium mt-1">{{ resource.contact }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

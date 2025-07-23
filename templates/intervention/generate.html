@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}生成干预方案{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="bg-purple-600 px-6 py-4">
+        <h2 class="text-xl font-bold text-white">生成个性化干预方案</h2>
+    </div>
+    <div class="px-6 py-4">
+        <p class="text-gray-600 mb-6">基于您的情绪记录和压力测试结果，我们可以为您生成个性化的干预方案。</p>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-6">
+                {{ form.focus_area.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for subfield in form.focus_area %}
+                    <label class="flex items-center p-3 border rounded-lg cursor-pointer transition duration-300 hover:border-purple-500 hover:bg-purple-50">
+                        {{ subfield(class="sr-only") }}
+                        <i class="fas {{ subfield.data == 'stress' ? 'fa-bolt' : subfield.data == 'anxiety' ? 'fa-exclamation-triangle' : subfield.data == 'mood' ? 'fa-smile' : subfield.data == 'sleep' ? 'fa-moon' : 'fa-heart' }} text-purple-500 text-xl mr-3"></i>
+                        <span class="text-gray-700">{{ subfield.label.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for error in form.focus_area.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="mb-6">
+                {{ form.severity.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                <div class="flex space-x-4">
+                    {% for subfield in form.severity %}
+                    <label class="flex items-center cursor-pointer">
+                        {{ subfield(class="sr-only") }}
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center border-2
+                            {% if subfield.data == 'mild' %}border-green-500
+                            {% elif subfield.data == 'moderate' %}border-yellow-500
+                            {% elif subfield.data == 'severe' %}border-red-500
+                            {% endif %}
+                            transition duration-300 hover:bg-gray-50 mr-2"></div>
+                        <span class="text-gray-700">{{ subfield.label.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% for error in form.severity.errors %}
+                    <span class="text-red-500 text-xs italic">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="mb-6">
+                {{ form.preferences.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {% for subfield in form.preferences %}
+                    <label class="flex items-center p-2 border rounded cursor-pointer transition duration-300 hover:border-purple-500 hover:bg-purple-50 text-sm">
+                        {{ subfield(class="sr-only") }}
+                        <i class="fas {{ subfield.data == 'exercise' ? 'fa-running' : subfield.data == 'meditation' ? 'fa-pray' : subfield.data == 'music' ? 'fa-music' : subfield.data == 'reading' ? 'fa-book' : subfield.data == 'social' ? 'fa-users' : 'fa-utensils' }} text-purple-500 mr-2"></i>
+                        <span class="text-gray-700">{{ subfield.label.text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-gray-500 mt-2">选择您感兴趣的干预方式（可多选）</p>
+            </div>
+
+            <div class="mb-6">
+                {{ form.additional_notes.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                {{ form.additional_notes(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-24 resize-none") }}
+                <p class="text-xs text-gray-500 mt-2">有什么其他需要告诉我们的？（选填）</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t">
+                {{ form.submit(class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition duration-300") }}
+                <a href="{{ url_for('intervention.index') }}" class="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-gray-800 transition duration-300">
+                    取消
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
