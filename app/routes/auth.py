@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.urls import url_parse
 from app import db
 from app.models import User
-from app.routes.auth.forms import LoginForm, RegistrationForm
+from app.routes.auth_forms.forms import LoginForm, RegistrationForm
 
 # 创建蓝图
 auth_bp = Blueprint('auth', __name__)
